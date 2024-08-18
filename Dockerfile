@@ -2,11 +2,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /source
 
-# Copy everything
-COPY . ./
-# Restore as distinct layers
+# Copy csproj and restore as distinct layers
+COPY *.csproj .
 RUN dotnet restore
 # Build and publish a release
+COPY . .
 RUN dotnet publish -c Release -o /app --no-restore
 
 
