@@ -56,6 +56,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            docker stop AlpimiAPI
+            docker rm AlpimiAPI
+            docker rmi alpimi-api
             docker load --input tmp/alpimi-api.tar
             docker run ${{ secrets.CONTAINER_ARGS }} alpimi-api
   update-db:
