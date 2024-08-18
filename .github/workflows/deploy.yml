@@ -34,7 +34,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: alpimi-api
-          path: /tmp
+          path: tmp
 
       - name: Upload artifact via ssh
         uses: appleboy/scp-action@v0.1.7
@@ -44,8 +44,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           strip_components: 1
-          target: ~/tmp/
-          source: /tmp/alpimi-api.tar
+          overwrite: true
+          target: tmp
+          source: tmp/alpimi-api.tar
 
       - name: Load and run image via ssh
         uses: appleboy/ssh-action@v1.0.3
@@ -83,7 +84,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           strip_components: 1
-          target: ~/tmp/
+          overwrite: true
+          target: tmp
           source: /tmp/db.sql
 
       - name: Update database
