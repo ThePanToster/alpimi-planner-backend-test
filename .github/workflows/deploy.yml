@@ -9,16 +9,18 @@ jobs:
   build:
     name: Build the image
     runs-on: ubuntu-latest
+    env:
+      HUSKY: 0
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: Build and export
         uses: docker/build-push-action@v6
         with:
           tags: alpimi-api:latest
           outputs: type=docker,dest=/tmp/alpimi-api.tar
-      
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -35,7 +37,7 @@ jobs:
         with:
           name: alpimi-api
           path: /tmp
-        
+
       - name: Upload artifact via ssh
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -45,7 +47,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           target: tmp
           source: /tmp/alpimi-api.tar
-        
+
       - name: Load and run image via ssh
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -66,8 +68,8 @@ jobs:
       - name: Install .NET Core 8 latest
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
-      
+          dotnet-version: "8.0.x"
+
       - name: Install EF Core CLI
         run: dotnet tool install dotnet-ef --global
 
