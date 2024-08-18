@@ -1,6 +1,6 @@
-ENV HUSKY=0
 # https://hub.docker.com/_/microsoft-dotnet
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ENV HUSKY=0
 WORKDIR /source
 
 # Copy csproj and restore as distinct layers
