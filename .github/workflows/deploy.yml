@@ -43,7 +43,8 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          target: ~/tmp/
+          strip_components: 1
+          target: tmp
           source: /tmp/alpimi-api.tar
 
       - name: Load and run image via ssh
@@ -81,7 +82,8 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          target: ~/tmp/
+          strip_components: 1
+          target: tmp
           source: /tmp/db.sql
 
       - name: Update database
