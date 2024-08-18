@@ -74,7 +74,7 @@ jobs:
         run: dotnet tool install dotnet-ef --global
 
       - name: Create a migration script
-        run: dotnet ef migrations script --idempotent -o /tmp/db.sql
+        run: dotnet ef migrations script --idempotent -o tmp/db.sql
 
       - name: Upload script via ssh
         uses: appleboy/scp-action@v0.1.7
@@ -86,7 +86,7 @@ jobs:
           strip_components: 1
           overwrite: true
           target: tmp
-          source: /tmp/db.sql
+          source: tmp/db.sql
 
       - name: Update database
         uses: appleboy/ssh-action@v1.0.3
