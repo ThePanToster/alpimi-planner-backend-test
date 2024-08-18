@@ -98,4 +98,4 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: docker exec ${{ secrets.DB_QUERY_ARGS }} < tmp/db.sql
+          script: cat tmp/db.sql | docker exec ${{ secrets.DB_QUERY_ARGS }}
