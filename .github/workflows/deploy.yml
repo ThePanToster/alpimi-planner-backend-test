@@ -95,4 +95,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: docker exec ${{ secrets.DB_QUERY_ARGS }} -i tmp/db.sql
+          script: |
+            docker cp tmp/db.sql AlpimiDB:/
+            docker exec ${{ secrets.DB_QUERY_ARGS }}
