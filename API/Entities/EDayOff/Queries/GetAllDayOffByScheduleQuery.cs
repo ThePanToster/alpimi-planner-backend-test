@@ -128,22 +128,29 @@ namespace AlpimiAPI.Entities.EDayOff.Queries
 
             if (daysOff != null)
             {
+                Dictionary<Guid, ScheduleSettings> scheduleSettingsMap =
+                    new Dictionary<Guid, ScheduleSettings>();
                 foreach (var dayOff in daysOff)
                 {
-                    GetScheduleSettingsHandler getScheduleSettingsHandler =
-                        new GetScheduleSettingsHandler(_dbService);
-                    GetScheduleSettingsQuery getScheduleSettingsQuery =
-                        new GetScheduleSettingsQuery(
-                            dayOff.ScheduleSettingsId,
-                            new Guid(),
-                            "Admin"
-                        );
-                    ActionResult<ScheduleSettings?> scheduleSettings =
-                        await getScheduleSettingsHandler.Handle(
-                            getScheduleSettingsQuery,
-                            cancellationToken
-                        );
-                    dayOff.ScheduleSettings = scheduleSettings.Value!;
+                    if (!scheduleSettingsMap.ContainsKey(dayOff.ScheduleSettingsId))
+                    {
+                        GetScheduleSettingsHandler getScheduleSettingsHandler =
+                            new GetScheduleSettingsHandler(_dbService);
+                        GetScheduleSettingsQuery getScheduleSettingsQuery =
+                            new GetScheduleSettingsQuery(
+                                dayOff.ScheduleSettingsId,
+                                new Guid(),
+                                "Admin"
+                            );
+                        ActionResult<ScheduleSettings?> scheduleSettings =
+                            await getScheduleSettingsHandler.Handle(
+                                getScheduleSettingsQuery,
+                                cancellationToken
+                            );
+
+                        scheduleSettingsMap.Add(dayOff.ScheduleSettingsId, scheduleSettings.Value!);
+                    }
+                    dayOff.ScheduleSettings = scheduleSettingsMap[dayOff.ScheduleSettingsId];
                 }
             }
 

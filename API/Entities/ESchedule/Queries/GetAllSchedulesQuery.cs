@@ -111,19 +111,25 @@ namespace AlpimiAPI.Entities.ESchedule.Queries
 
             if (schedules != null)
             {
+                Dictionary<Guid, User> userMap = new Dictionary<Guid, User>();
                 foreach (var schedule in schedules)
                 {
-                    GetUserHandler getUserHandler = new GetUserHandler(_dbService);
-                    GetUserQuery getUserQuery = new GetUserQuery(
-                        schedule.UserId,
-                        new Guid(),
-                        "Admin"
-                    );
-                    ActionResult<User?> user = await getUserHandler.Handle(
-                        getUserQuery,
-                        cancellationToken
-                    );
-                    schedule.User = user.Value!;
+                    if (!userMap.ContainsKey(schedule.UserId))
+                    {
+                        GetUserHandler getUserHandler = new GetUserHandler(_dbService);
+                        GetUserQuery getUserQuery = new GetUserQuery(
+                            schedule.UserId,
+                            new Guid(),
+                            "Admin"
+                        );
+                        ActionResult<User?> user = await getUserHandler.Handle(
+                            getUserQuery,
+                            cancellationToken
+                        );
+
+                        userMap.Add(schedule.UserId, user.Value!);
+                    }
+                    schedule.User = userMap[schedule.UserId];
                 }
             }
 

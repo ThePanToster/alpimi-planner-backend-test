@@ -3,6 +3,7 @@ using AlpimiAPI.Entities.EClassroom;
 using AlpimiAPI.Entities.EClassroom.Queries;
 using AlpimiAPI.Entities.ELesson;
 using AlpimiAPI.Entities.ELesson.Queries;
+using AlpimiAPI.Entities.ESchedule;
 using AlpimiAPI.Entities.EScheduleSettings;
 using AlpimiAPI.Entities.ETeacher;
 using AlpimiAPI.Entities.ETeacher.Queries;
@@ -173,53 +174,72 @@ namespace AlpimiAPI.Entities.ELessonBlock.Queries
 
             if (lessonBlocks != null)
             {
+                Dictionary<Guid, Lesson> lessonMap = new Dictionary<Guid, Lesson>();
+                Dictionary<Guid, Classroom> classroomMap = new Dictionary<Guid, Classroom>();
+                Dictionary<Guid, Teacher> teacherMap = new Dictionary<Guid, Teacher>();
                 foreach (var lessonBlock in lessonBlocks)
                 {
-                    GetLessonHandler getLessonHandler = new GetLessonHandler(_dbService);
-                    GetLessonQuery getLessonQuery = new GetLessonQuery(
-                        lessonBlock.LessonId,
-                        new Guid(),
-                        "Admin"
-                    );
-                    ActionResult<Lesson?> lesson = await getLessonHandler.Handle(
-                        getLessonQuery,
-                        cancellationToken
-                    );
-                    lessonBlock.Lesson = lesson.Value!;
-
-                    if (lessonBlock.ClassroomId != null)
+                    if (!lessonMap.ContainsKey(lessonBlock.LessonId))
                     {
-                        GetClassroomHandler getClassroomHandler = new GetClassroomHandler(
-                            _dbService
-                        );
-                        GetClassroomQuery getClassroomQuery = new GetClassroomQuery(
-                            lessonBlock.ClassroomId.Value,
+                        GetLessonHandler getLessonHandler = new GetLessonHandler(_dbService);
+                        GetLessonQuery getLessonQuery = new GetLessonQuery(
+                            lessonBlock.LessonId,
                             new Guid(),
                             "Admin"
                         );
-                        ActionResult<Classroom?> classroom = await getClassroomHandler.Handle(
-                            getClassroomQuery,
+                        ActionResult<Lesson?> lesson = await getLessonHandler.Handle(
+                            getLessonQuery,
                             cancellationToken
                         );
-                        lessonBlock.Classroom = classroom.Value!;
+
+                        lessonMap.Add(lessonBlock.LessonId, lesson.Value!);
+                    }
+                    lessonBlock.Lesson = lessonMap[lessonBlock.LessonId];
+
+                    if (lessonBlock.ClassroomId != null)
+                    {
+                        if (!classroomMap.ContainsKey(lessonBlock.ClassroomId.Value))
+                        {
+                            GetClassroomHandler getClassroomHandler = new GetClassroomHandler(
+                                _dbService
+                            );
+                            GetClassroomQuery getClassroomQuery = new GetClassroomQuery(
+                                lessonBlock.ClassroomId.Value,
+                                new Guid(),
+                                "Admin"
+                            );
+                            ActionResult<Classroom?> classroom = await getClassroomHandler.Handle(
+                                getClassroomQuery,
+                                cancellationToken
+                            );
+
+                            classroomMap.Add(lessonBlock.ClassroomId.Value, classroom.Value!);
+                        }
+                        lessonBlock.Classroom = classroomMap[lessonBlock.ClassroomId.Value];
                     }
 
                     if (lessonBlock.TeacherId != null)
                     {
-                        GetTeacherHandler getTeacherHandler = new GetTeacherHandler(_dbService);
-                        GetTeacherQuery getTeacherQuery = new GetTeacherQuery(
-                            lessonBlock.TeacherId.Value,
-                            new Guid(),
-                            "Admin"
-                        );
-                        ActionResult<Teacher?> teacher = await getTeacherHandler.Handle(
-                            getTeacherQuery,
-                            cancellationToken
-                        );
-                        lessonBlock.Teacher = teacher.Value!;
+                        if (!teacherMap.ContainsKey(lessonBlock.TeacherId.Value))
+                        {
+                            GetTeacherHandler getTeacherHandler = new GetTeacherHandler(_dbService);
+                            GetTeacherQuery getTeacherQuery = new GetTeacherQuery(
+                                lessonBlock.TeacherId.Value,
+                                new Guid(),
+                                "Admin"
+                            );
+                            ActionResult<Teacher?> teacher = await getTeacherHandler.Handle(
+                                getTeacherQuery,
+                                cancellationToken
+                            );
+
+                            teacherMap.Add(lessonBlock.TeacherId.Value, teacher.Value!);
+                        }
+                        lessonBlock.Teacher = teacherMap[lessonBlock.TeacherId.Value];
                     }
                 }
             }
+
             return (lessonBlocks, count);
         }
     }
