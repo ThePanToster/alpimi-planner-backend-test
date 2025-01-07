@@ -127,22 +127,34 @@ namespace AlpimiAPI.Entities.ELessonPeriod.Queries
 
             if (lessonPeriods != null)
             {
+                Dictionary<Guid, ScheduleSettings> scheduleSettingsMap =
+                    new Dictionary<Guid, ScheduleSettings>();
                 foreach (var lessonPeriod in lessonPeriods)
                 {
-                    GetScheduleSettingsHandler getScheduleSettingsHandler =
-                        new GetScheduleSettingsHandler(_dbService);
-                    GetScheduleSettingsQuery getScheduleSettingsQuery =
-                        new GetScheduleSettingsQuery(
+                    if (!scheduleSettingsMap.ContainsKey(lessonPeriod.ScheduleSettingsId))
+                    {
+                        GetScheduleSettingsHandler getScheduleSettingsHandler =
+                            new GetScheduleSettingsHandler(_dbService);
+                        GetScheduleSettingsQuery getScheduleSettingsQuery =
+                            new GetScheduleSettingsQuery(
+                                lessonPeriod.ScheduleSettingsId,
+                                new Guid(),
+                                "Admin"
+                            );
+                        ActionResult<ScheduleSettings?> scheduleSettings =
+                            await getScheduleSettingsHandler.Handle(
+                                getScheduleSettingsQuery,
+                                cancellationToken
+                            );
+
+                        scheduleSettingsMap.Add(
                             lessonPeriod.ScheduleSettingsId,
-                            new Guid(),
-                            "Admin"
+                            scheduleSettings.Value!
                         );
-                    ActionResult<ScheduleSettings?> scheduleSettings =
-                        await getScheduleSettingsHandler.Handle(
-                            getScheduleSettingsQuery,
-                            cancellationToken
-                        );
-                    lessonPeriod.ScheduleSettings = scheduleSettings.Value!;
+                    }
+                    lessonPeriod.ScheduleSettings = scheduleSettingsMap[
+                        lessonPeriod.ScheduleSettingsId
+                    ];
                 }
             }
 

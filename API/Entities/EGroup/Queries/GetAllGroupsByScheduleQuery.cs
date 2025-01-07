@@ -123,19 +123,25 @@ namespace AlpimiAPI.Entities.EGroup.Queries
 
             if (groups != null)
             {
+                Dictionary<Guid, Schedule> scheduleMap = new Dictionary<Guid, Schedule>();
                 foreach (var group in groups)
                 {
-                    GetScheduleHandler getScheduleHandler = new GetScheduleHandler(_dbService);
-                    GetScheduleQuery getScheduleQuery = new GetScheduleQuery(
-                        group.ScheduleId,
-                        new Guid(),
-                        "Admin"
-                    );
-                    ActionResult<Schedule?> schedule = await getScheduleHandler.Handle(
-                        getScheduleQuery,
-                        cancellationToken
-                    );
-                    group.Schedule = schedule.Value!;
+                    if (!scheduleMap.ContainsKey(group.ScheduleId))
+                    {
+                        GetScheduleHandler getScheduleHandler = new GetScheduleHandler(_dbService);
+                        GetScheduleQuery getScheduleQuery = new GetScheduleQuery(
+                            group.ScheduleId,
+                            new Guid(),
+                            "Admin"
+                        );
+                        ActionResult<Schedule?> schedule = await getScheduleHandler.Handle(
+                            getScheduleQuery,
+                            cancellationToken
+                        );
+
+                        scheduleMap.Add(group.ScheduleId, schedule.Value!);
+                    }
+                    group.Schedule = scheduleMap[group.ScheduleId];
                 }
             }
 

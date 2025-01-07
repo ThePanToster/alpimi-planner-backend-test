@@ -1,8 +1,11 @@
 ﻿using AlpimiAPI.Database;
+using AlpimiAPI.Entities.EClassroom;
+using AlpimiAPI.Entities.ELessonBlock;
 using AlpimiAPI.Entities.ELessonType;
 using AlpimiAPI.Entities.ELessonType.Queries;
 using AlpimiAPI.Entities.ESubgroup;
 using AlpimiAPI.Entities.ESubgroup.Queries;
+using AlpimiAPI.Entities.ETeacher;
 using AlpimiAPI.Locales;
 using AlpimiAPI.Responses;
 using MediatR;
@@ -133,33 +136,45 @@ namespace AlpimiAPI.Entities.ELesson.Queries
 
             if (lessons != null)
             {
+                Dictionary<Guid, Subgroup> subgroupMap = new Dictionary<Guid, Subgroup>();
+                Dictionary<Guid, LessonType> lessonTypeMap = new Dictionary<Guid, LessonType>();
                 foreach (var lesson in lessons)
                 {
-                    GetLessonTypeHandler getLessonTypeHandler = new GetLessonTypeHandler(
-                        _dbService
-                    );
-                    GetLessonTypeQuery getLessonTypeQuery = new GetLessonTypeQuery(
-                        lesson.LessonTypeId,
-                        new Guid(),
-                        "Admin"
-                    );
-                    ActionResult<LessonType?> lessonType = await getLessonTypeHandler.Handle(
-                        getLessonTypeQuery,
-                        cancellationToken
-                    );
-                    lesson.LessonType = lessonType.Value!;
+                    if (!lessonTypeMap.ContainsKey(lesson.LessonTypeId))
+                    {
+                        GetLessonTypeHandler getLessonTypeHandler = new GetLessonTypeHandler(
+                            _dbService
+                        );
+                        GetLessonTypeQuery getLessonTypeQuery = new GetLessonTypeQuery(
+                            lesson.LessonTypeId,
+                            new Guid(),
+                            "Admin"
+                        );
+                        ActionResult<LessonType?> lessonType = await getLessonTypeHandler.Handle(
+                            getLessonTypeQuery,
+                            cancellationToken
+                        );
 
-                    GetSubgroupHandler getSubgroupHandler = new GetSubgroupHandler(_dbService);
-                    GetSubgroupQuery getSubgroupQuery = new GetSubgroupQuery(
-                        lesson.SubgroupId,
-                        new Guid(),
-                        "Admin"
-                    );
-                    ActionResult<Subgroup?> subgroup = await getSubgroupHandler.Handle(
-                        getSubgroupQuery,
-                        cancellationToken
-                    );
-                    lesson.Subgroup = subgroup.Value!;
+                        lessonTypeMap.Add(lesson.LessonTypeId, lessonType.Value!);
+                    }
+                    lesson.LessonType = lessonTypeMap[lesson.LessonTypeId];
+
+                    if (!subgroupMap.ContainsKey(lesson.SubgroupId))
+                    {
+                        GetSubgroupHandler getSubgroupHandler = new GetSubgroupHandler(_dbService);
+                        GetSubgroupQuery getSubgroupQuery = new GetSubgroupQuery(
+                            lesson.SubgroupId,
+                            new Guid(),
+                            "Admin"
+                        );
+                        ActionResult<Subgroup?> subgroup = await getSubgroupHandler.Handle(
+                            getSubgroupQuery,
+                            cancellationToken
+                        );
+
+                        subgroupMap.Add(lesson.SubgroupId, subgroup.Value!);
+                    }
+                    lesson.Subgroup = subgroupMap[lesson.SubgroupId];
                 }
             }
 

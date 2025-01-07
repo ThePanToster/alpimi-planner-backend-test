@@ -131,19 +131,25 @@ namespace AlpimiAPI.Entities.EStudent.Queries
 
             if (students != null)
             {
+                Dictionary<Guid, Group> groupMap = new Dictionary<Guid, Group>();
                 foreach (var student in students)
                 {
-                    GetGroupHandler getGroupHandler = new GetGroupHandler(_dbService);
-                    GetGroupQuery getGroupQuery = new GetGroupQuery(
-                        student.GroupId,
-                        new Guid(),
-                        "Admin"
-                    );
-                    ActionResult<Group?> group = await getGroupHandler.Handle(
-                        getGroupQuery,
-                        cancellationToken
-                    );
-                    student.Group = group.Value!;
+                    if (!groupMap.ContainsKey(student.GroupId))
+                    {
+                        GetGroupHandler getGroupHandler = new GetGroupHandler(_dbService);
+                        GetGroupQuery getGroupQuery = new GetGroupQuery(
+                            student.GroupId,
+                            new Guid(),
+                            "Admin"
+                        );
+                        ActionResult<Group?> group = await getGroupHandler.Handle(
+                            getGroupQuery,
+                            cancellationToken
+                        );
+
+                        groupMap.Add(student.GroupId, group.Value!);
+                    }
+                    student.Group = groupMap[student.GroupId];
                 }
             }
 

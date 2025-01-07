@@ -133,19 +133,25 @@ namespace AlpimiAPI.Entities.ESubgroup.Queries
 
             if (subgroups != null)
             {
+                Dictionary<Guid, Group> groupMap = new Dictionary<Guid, Group>();
                 foreach (var subgroup in subgroups)
                 {
-                    GetGroupHandler getGroupHandler = new GetGroupHandler(_dbService);
-                    GetGroupQuery getGroupQuery = new GetGroupQuery(
-                        subgroup.GroupId,
-                        new Guid(),
-                        "Admin"
-                    );
-                    ActionResult<Group?> group = await getGroupHandler.Handle(
-                        getGroupQuery,
-                        cancellationToken
-                    );
-                    subgroup.Group = group.Value!;
+                    if (!groupMap.ContainsKey(subgroup.GroupId))
+                    {
+                        GetGroupHandler getGroupHandler = new GetGroupHandler(_dbService);
+                        GetGroupQuery getGroupQuery = new GetGroupQuery(
+                            subgroup.GroupId,
+                            new Guid(),
+                            "Admin"
+                        );
+                        ActionResult<Group?> group = await getGroupHandler.Handle(
+                            getGroupQuery,
+                            cancellationToken
+                        );
+
+                        groupMap.Add(subgroup.GroupId, group.Value!);
+                    }
+                    subgroup.Group = groupMap[subgroup.GroupId];
                 }
             }
 

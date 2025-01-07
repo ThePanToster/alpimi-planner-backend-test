@@ -135,19 +135,25 @@ namespace AlpimiAPI.Entities.EClassroomType.Queries
 
             if (classroomTypes != null)
             {
+                Dictionary<Guid, Schedule> scheduleMap = new Dictionary<Guid, Schedule>();
                 foreach (var classroomType in classroomTypes)
                 {
-                    GetScheduleHandler getScheduleHandler = new GetScheduleHandler(_dbService);
-                    GetScheduleQuery getScheduleQuery = new GetScheduleQuery(
-                        classroomType.ScheduleId,
-                        new Guid(),
-                        "Admin"
-                    );
-                    ActionResult<Schedule?> schedule = await getScheduleHandler.Handle(
-                        getScheduleQuery,
-                        cancellationToken
-                    );
-                    classroomType.Schedule = schedule.Value!;
+                    if (!scheduleMap.ContainsKey(classroomType.ScheduleId))
+                    {
+                        GetScheduleHandler getScheduleHandler = new GetScheduleHandler(_dbService);
+                        GetScheduleQuery getScheduleQuery = new GetScheduleQuery(
+                            classroomType.ScheduleId,
+                            new Guid(),
+                            "Admin"
+                        );
+                        ActionResult<Schedule?> schedule = await getScheduleHandler.Handle(
+                            getScheduleQuery,
+                            cancellationToken
+                        );
+
+                        scheduleMap.Add(classroomType.ScheduleId, schedule.Value!);
+                    }
+                    classroomType.Schedule = scheduleMap[classroomType.ScheduleId];
                 }
             }
 
