@@ -82,7 +82,7 @@ namespace AlpimiAPI.Entities.ELessonBlock.Commands
                     null,
                     request.FilteredId,
                     request.Role,
-                    new PaginationParams(1, 0, "LessonDate", "ASC")
+                    new PaginationParams(1, 0, "LessonDate", "DESC")
                 );
                 ActionResult<(IEnumerable<LessonBlock>?, int)> finalLessonBlock =
                     await getFirstLessonBlocksHandler.Handle(
