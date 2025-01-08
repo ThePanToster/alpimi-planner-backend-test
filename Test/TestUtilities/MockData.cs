@@ -596,7 +596,6 @@ namespace AlpimiTest.TestUtilities
                 LessonStart = 2,
                 LessonEnd = 3,
                 WeekDay = 2,
-                UpdateCluster = false
             };
         }
     }

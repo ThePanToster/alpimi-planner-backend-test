@@ -13,8 +13,5 @@ namespace AlpimiAPI.Entities.ELessonBlock.DTO
         public Guid? ClassroomId { get; set; }
 
         public Guid? TeacherId { get; set; }
-
-        [Required]
-        public required bool UpdateCluster { get; set; }
     }
 }
