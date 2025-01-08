@@ -324,7 +324,6 @@ namespace AlpimiTest.Entities.ELessonBlock
         public async Task UpdateLessonBlockUpdatesLessonBlockCluster()
         {
             var lessonBlockUpdateRequest = MockData.GetUpdateLessonBlockDTODetails();
-            lessonBlockUpdateRequest.UpdateCluster = true;
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 "Bearer",
                 TestAuthorization.GetToken("Admin", "Bob", userId)
@@ -347,7 +346,6 @@ namespace AlpimiTest.Entities.ELessonBlock
         public async Task UpdateLessonBlockUpdatesLessonsCurrentHours()
         {
             var lessonBlockUpdateRequest = MockData.GetUpdateLessonBlockDTODetails();
-            lessonBlockUpdateRequest.UpdateCluster = true;
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 "Bearer",
                 TestAuthorization.GetToken("Admin", "Bob", userId)

@@ -39,71 +39,64 @@ namespace AlpimiAPI.Entities.ELessonBlock.Commands
         {
             LessonBlock oneLessonBlock;
             LessonBlock lastLessonBlock;
-            int amountOfLessonsToUpdate = 1;
-            int amountOfLessonHoursToUpdate;
 
-            if (request.dto.UpdateCluster)
+            GetLessonBlockHandler getLessonBlockHandler = new GetLessonBlockHandler(_dbService);
+            GetLessonBlockQuery getLessonBlockQuery = new GetLessonBlockQuery(
+                request.Id,
+                request.FilteredId,
+                request.Role
+            );
+            ActionResult<LessonBlock?> lessonBlock = await getLessonBlockHandler.Handle(
+                getLessonBlockQuery,
+                cancellationToken
+            );
+
+            if (lessonBlock.Value == null)
             {
-                GetAllLessonBlocksHandler getAllLessonBlocksHandler = new GetAllLessonBlocksHandler(
-                    _dbService,
-                    _str
-                );
-                GetAllLessonBlocksQuery getAllLessonBlocksQuery = new GetAllLessonBlocksQuery(
+                GetAllLessonBlocksHandler getFirstLessonBlocksHandler =
+                    new GetAllLessonBlocksHandler(_dbService, _str);
+                GetAllLessonBlocksQuery getFirstLessonBlocksQuery = new GetAllLessonBlocksQuery(
                     request.Id,
                     null,
                     null,
                     request.FilteredId,
                     request.Role,
-                    new PaginationParams(int.MaxValue, 0, "LessonDate", "ASC")
+                    new PaginationParams(1, 0, "LessonDate", "ASC")
                 );
-                ActionResult<(IEnumerable<LessonBlock>?, int)> lessonBlocks =
-                    await getAllLessonBlocksHandler.Handle(
-                        getAllLessonBlocksQuery,
+                ActionResult<(IEnumerable<LessonBlock>?, int)> firstLessonBlock =
+                    await getFirstLessonBlocksHandler.Handle(
+                        getFirstLessonBlocksQuery,
                         cancellationToken
                     );
 
-                if (lessonBlocks.Value.Item2 == 0)
+                if (firstLessonBlock.Value.Item2 == 0)
                 {
                     return null;
                 }
-                oneLessonBlock = lessonBlocks.Value.Item1!.First();
-                lastLessonBlock = lessonBlocks.Value.Item1!.Last();
-                amountOfLessonsToUpdate = lessonBlocks.Value.Item2;
-                amountOfLessonHoursToUpdate =
-                    (
-                        (
-                            request.dto.LessonEnd
-                            ?? oneLessonBlock.LessonEnd - request.dto.LessonStart
-                            ?? oneLessonBlock.LessonStart + 1
-                        ) - (oneLessonBlock.LessonEnd - oneLessonBlock.LessonStart + 1)
-                    ) * lessonBlocks.Value.Item2;
+
+                GetAllLessonBlocksHandler getLastLessonBlocksHandler =
+                    new GetAllLessonBlocksHandler(_dbService, _str);
+                GetAllLessonBlocksQuery getLastLessonBlocksQuery = new GetAllLessonBlocksQuery(
+                    request.Id,
+                    null,
+                    null,
+                    request.FilteredId,
+                    request.Role,
+                    new PaginationParams(1, 0, "LessonDate", "DESC")
+                );
+                ActionResult<(IEnumerable<LessonBlock>?, int)> finalLessonBlock =
+                    await getFirstLessonBlocksHandler.Handle(
+                        getFirstLessonBlocksQuery,
+                        cancellationToken
+                    );
+
+                oneLessonBlock = firstLessonBlock.Value.Item1!.First();
+                lastLessonBlock = firstLessonBlock.Value.Item1!.First();
             }
             else
             {
-                GetLessonBlockHandler getLessonBlockHandler = new GetLessonBlockHandler(_dbService);
-                GetLessonBlockQuery getLessonBlockQuery = new GetLessonBlockQuery(
-                    request.Id,
-                    request.FilteredId,
-                    request.Role
-                );
-                ActionResult<LessonBlock?> lessonBlock = await getLessonBlockHandler.Handle(
-                    getLessonBlockQuery,
-                    cancellationToken
-                );
-
-                if (lessonBlock.Value == null)
-                {
-                    return null;
-                }
-
                 oneLessonBlock = lessonBlock.Value;
                 lastLessonBlock = oneLessonBlock;
-                amountOfLessonHoursToUpdate =
-                    (
-                        request.dto.LessonEnd
-                        ?? oneLessonBlock.LessonEnd - request.dto.LessonStart
-                        ?? oneLessonBlock.LessonStart + 1
-                    ) - (oneLessonBlock.LessonEnd - oneLessonBlock.LessonStart + 1);
             }
 
             List<ErrorObject> errors = new List<ErrorObject>();

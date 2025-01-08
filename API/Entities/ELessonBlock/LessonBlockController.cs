@@ -113,8 +113,8 @@ namespace AlpimiAPI.Entities.ELessonBlock
         /// Updates one or multiple LessonBlocks
         /// </summary>
         /// <remarks>
-        /// To update multiple LessonBlocks provide a valid ClusterId and set UpdateCluster to true.
-        /// To update one LessonBlock provide a valid LessonBlockId and set UpdateCluster to false.
+        /// To update multiple LessonBlocks provide a valid ClusterId.
+        /// To update one LessonBlock provide a valid LessonBlockId.
         /// - JWT token is required
         /// </remarks>
         [HttpPatch("{id}")]
