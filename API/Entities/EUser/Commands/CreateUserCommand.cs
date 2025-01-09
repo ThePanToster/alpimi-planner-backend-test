@@ -75,51 +75,62 @@ namespace AlpimiAPI.Entities.EUser.Commands
                 );
             }
 
-            RequiredCharacterTypes[]? requiredCharacterTypes = AuthSettings.RequiredCharacters;
-            bool requiredCharactersError = false;
+            RequiredCharacterTypes[]? requiredCharacterTypes =
+                Configuration.GetRequiredCharacterTypesForPassword();
 
-            if (requiredCharacterTypes != null)
-            {
-                if (requiredCharacterTypes.Contains(RequiredCharacterTypes.BigLetter))
-                {
-                    if (!request.dto.Password.Any(char.IsUpper))
-                    {
-                        requiredCharactersError = true;
-                    }
-                }
-                if (requiredCharacterTypes.Contains(RequiredCharacterTypes.SmallLetter))
-                {
-                    if (!request.dto.Password.Any(char.IsLower))
-                    {
-                        requiredCharactersError = true;
-                    }
-                }
-                if (requiredCharacterTypes.Contains(RequiredCharacterTypes.Digit))
-                {
-                    if (!request.dto.Password.Any(char.IsDigit))
-                    {
-                        requiredCharactersError = true;
-                    }
-                }
-                if (requiredCharacterTypes.Contains(RequiredCharacterTypes.Symbol))
-                {
-                    if (
-                        !(
-                            request.dto.Password.Any(char.IsSymbol)
-                            || request.dto.Password.Any(char.IsPunctuation)
-                        )
-                    )
-                    {
-                        requiredCharactersError = true;
-                    }
-                }
-            }
-
-            if (requiredCharactersError)
+            if (!CharacterFilter.Required(request.dto.Password, requiredCharacterTypes))
             {
                 errors.Add(
                     new ErrorObject(
                         _str["passwordMustContain", string.Join(", ", requiredCharacterTypes!)]
+                    )
+                );
+            }
+
+            AllowedCharacterTypes[]? allowedCharacterTypesForPassword =
+                Configuration.GetAllowedCharacterTypesForPassword();
+
+            if (!CharacterFilter.Allowed(request.dto.Password, allowedCharacterTypesForPassword))
+            {
+                errors.Add(
+                    new ErrorObject(
+                        _str[
+                            "cantContain",
+                            "Password",
+                            string.Join(", ", allowedCharacterTypesForPassword!)
+                        ]
+                    )
+                );
+            }
+
+            AllowedCharacterTypes[]? allowedCharacterTypesForLogin =
+                Configuration.GetAllowedCharacterTypesForLogin();
+
+            if (!CharacterFilter.Allowed(request.dto.Login, allowedCharacterTypesForLogin))
+            {
+                errors.Add(
+                    new ErrorObject(
+                        _str[
+                            "cantContain",
+                            "Login",
+                            string.Join(", ", allowedCharacterTypesForLogin!)
+                        ]
+                    )
+                );
+            }
+
+            AllowedCharacterTypes[]? allowedCharacterTypesForCustomURL =
+                Configuration.GetAllowedCharacterTypesForCustomURL();
+
+            if (!CharacterFilter.Allowed(request.dto.CustomURL, allowedCharacterTypesForCustomURL))
+            {
+                errors.Add(
+                    new ErrorObject(
+                        _str[
+                            "cantContain",
+                            "CustomURL",
+                            string.Join(", ", allowedCharacterTypesForCustomURL!)
+                        ]
                     )
                 );
             }
