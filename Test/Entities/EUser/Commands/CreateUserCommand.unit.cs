@@ -4,6 +4,7 @@ using AlpimiAPI.Entities.EUser.Commands;
 using AlpimiAPI.Locales;
 using AlpimiAPI.Responses;
 using AlpimiAPI.Settings;
+using AlpimiAPI.Utilities;
 using AlpimiTest.TestSetup;
 using AlpimiTest.TestUtilities;
 using Microsoft.Extensions.Localization;
@@ -96,7 +97,7 @@ namespace AlpimiTest.Entities.EUser.Commands
                 async () =>
                     await createUserHandler.Handle(createUserCommand, new CancellationToken())
             );
-            var requiredCharacters = AuthSettings.RequiredCharacters;
+            var requiredCharacters = Configuration.GetRequiredCharacterTypesForPassword();
 
             Assert.Equal(
                 JsonConvert.SerializeObject(
@@ -125,7 +126,7 @@ namespace AlpimiTest.Entities.EUser.Commands
                 async () =>
                     await createUserHandler.Handle(createUserCommand, new CancellationToken())
             );
-            var requiredCharacters = AuthSettings.RequiredCharacters;
+            var requiredCharacters = Configuration.GetRequiredCharacterTypesForPassword();
 
             Assert.Equal(
                 JsonConvert.SerializeObject(
@@ -154,7 +155,7 @@ namespace AlpimiTest.Entities.EUser.Commands
                 async () =>
                     await createUserHandler.Handle(createUserCommand, new CancellationToken())
             );
-            var requiredCharacters = AuthSettings.RequiredCharacters;
+            var requiredCharacters = Configuration.GetRequiredCharacterTypesForPassword();
 
             Assert.Equal(
                 JsonConvert.SerializeObject(
@@ -183,7 +184,7 @@ namespace AlpimiTest.Entities.EUser.Commands
                 async () =>
                     await createUserHandler.Handle(createUserCommand, new CancellationToken())
             );
-            var requiredCharacters = AuthSettings.RequiredCharacters;
+            var requiredCharacters = Configuration.GetRequiredCharacterTypesForPassword();
 
             Assert.Equal(
                 JsonConvert.SerializeObject(
@@ -214,7 +215,6 @@ namespace AlpimiTest.Entities.EUser.Commands
                 async () =>
                     await createUserHandler.Handle(createUserCommand, new CancellationToken())
             );
-            var requiredCharacters = AuthSettings.RequiredCharacters;
 
             Assert.Equal(
                 JsonConvert.SerializeObject(
@@ -255,6 +255,90 @@ namespace AlpimiTest.Entities.EUser.Commands
         }
 
         [Fact]
+        public async Task ThrowsErrorWhenPasswordContainsAnIllegalSymbol()
+        {
+            var dto = MockData.GetCreateUserDTODetails();
+            dto.Password = "sssSSS1!る";
+
+            var createUserCommand = new CreateUserCommand(new Guid(), new Guid(), dto);
+            var createUserHandler = new CreateUserHandler(_dbService.Object, _str.Object);
+            var result = await Assert.ThrowsAsync<ApiErrorException>(
+                async () =>
+                    await createUserHandler.Handle(createUserCommand, new CancellationToken())
+            );
+            var allowedCharacters = Configuration.GetAllowedCharacterTypesForPassword();
+
+            Assert.Equal(
+                JsonConvert.SerializeObject(
+                    new ErrorObject[]
+                    {
+                        new ErrorObject(
+                            "Password can only contain the following: "
+                                + string.Join(", ", allowedCharacters!)
+                        )
+                    }
+                ),
+                JsonConvert.SerializeObject(result.errors)
+            );
+        }
+
+        [Fact]
+        public async Task ThrowsErrorWhenLoginContainsAnIllegalSymbol()
+        {
+            var dto = MockData.GetCreateUserDTODetails();
+            dto.Login = "る";
+
+            var createUserCommand = new CreateUserCommand(new Guid(), new Guid(), dto);
+            var createUserHandler = new CreateUserHandler(_dbService.Object, _str.Object);
+            var result = await Assert.ThrowsAsync<ApiErrorException>(
+                async () =>
+                    await createUserHandler.Handle(createUserCommand, new CancellationToken())
+            );
+            var allowedCharacters = Configuration.GetAllowedCharacterTypesForLogin();
+
+            Assert.Equal(
+                JsonConvert.SerializeObject(
+                    new ErrorObject[]
+                    {
+                        new ErrorObject(
+                            "Login can only contain the following: "
+                                + string.Join(", ", allowedCharacters!)
+                        )
+                    }
+                ),
+                JsonConvert.SerializeObject(result.errors)
+            );
+        }
+
+        [Fact]
+        public async Task ThrowsErrorWhenCustomURLContainsAnIllegalSymbol()
+        {
+            var dto = MockData.GetCreateUserDTODetails();
+            dto.CustomURL = "る";
+
+            var createUserCommand = new CreateUserCommand(new Guid(), new Guid(), dto);
+            var createUserHandler = new CreateUserHandler(_dbService.Object, _str.Object);
+            var result = await Assert.ThrowsAsync<ApiErrorException>(
+                async () =>
+                    await createUserHandler.Handle(createUserCommand, new CancellationToken())
+            );
+            var allowedCharacters = Configuration.GetAllowedCharacterTypesForCustomURL();
+
+            Assert.Equal(
+                JsonConvert.SerializeObject(
+                    new ErrorObject[]
+                    {
+                        new ErrorObject(
+                            "CustomURL can only contain the following: "
+                                + string.Join(", ", allowedCharacters!)
+                        )
+                    }
+                ),
+                JsonConvert.SerializeObject(result.errors)
+            );
+        }
+
+        [Fact]
         public async Task ThrowsMultipleErrorMessages()
         {
             var dto = MockData.GetCreateUserDTODetails();
@@ -267,7 +351,7 @@ namespace AlpimiTest.Entities.EUser.Commands
                 async () =>
                     await createUserHandler.Handle(createUserCommand, new CancellationToken())
             );
-            var requiredCharacters = AuthSettings.RequiredCharacters;
+            var requiredCharacters = Configuration.GetRequiredCharacterTypesForPassword();
 
             Assert.Equal(
                 JsonConvert.SerializeObject(

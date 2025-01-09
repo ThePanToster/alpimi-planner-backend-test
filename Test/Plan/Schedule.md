@@ -32,6 +32,9 @@
 - [ThrowsErrorWhenSchoolDaysContainsSomethingOtherThan1Or0()](../Entities/ESchedule/Commands/CreateScheduleCommand.unit.cs) - **unit**  
   Check if returns an error when school days contains symbols other than 1 or 0
 
+- [ThrowsErrorWhenNameContainsIllegalAnSymbol](../Entities/ESchedule/Commands/CreateScheduleCommand.unit.cs) - **unit**  
+  Check if returns an error when name contains an illegal symbol
+
 
 ## `DELETE` `api/Schedule/{id}`
 
@@ -53,6 +56,8 @@
 - [ThrowsErrorWhenURLAlreadyExists()](../Entities/ESchedule/Commands/UpdateScheduleCommand.unit.cs) - **unit**  
   Check if returns an error when url is already taken
 
+- [ThrowsErrorWhenNameContainsIllegalAnSymbol](../Entities/ESchedule/Commands/UpdateScheduleCommand.unit.cs) - **unit**  
+  Check if returns an error when name contains an illegal symbol
 
 ## `GET` `api/Schedule`
 

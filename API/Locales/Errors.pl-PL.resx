@@ -186,4 +186,7 @@
   <data name="badWeekDay" xml:space="preserve">
     <value>Lekcja nie może odbywać się w {0}</value>
   </data>
+  <data name="cantContain" xml:space="preserve">
+    <value>{0} może tylko zawierać następujące: {1}</value>
+  </data>
 </root>

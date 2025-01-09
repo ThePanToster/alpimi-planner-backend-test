@@ -3,6 +3,7 @@ using AlpimiAPI.Entities.EUser;
 using AlpimiAPI.Entities.EUser.Commands;
 using AlpimiAPI.Locales;
 using AlpimiAPI.Responses;
+using AlpimiAPI.Utilities;
 using AlpimiTest.TestSetup;
 using AlpimiTest.TestUtilities;
 using Microsoft.Extensions.Localization;
@@ -24,18 +25,17 @@ namespace AlpimiTest.Entities.EUser.Commands
         }
 
         [Fact]
-        public async Task ThrowsErrorWhenURLAlreadyExists()
+        public async Task ThrowsErrorWhenLoginAlreadyExists()
         {
             var dto = MockData.GetUpdateUserDTODetails();
-            var user = MockData.GetUserDetails();
             _dbService
                 .Setup(s => s.Get<User>(It.IsAny<string>(), It.IsAny<object>()))
-                .ReturnsAsync(user);
+                .ReturnsAsync(MockData.GetUserDetails());
             _dbService
-                .Setup(s => s.Get<string>(It.IsAny<string>(), It.IsAny<object>()))
-                .ReturnsAsync(user.CustomURL);
+                .Setup(s => s.GetAll<string>(It.IsAny<string>(), It.IsAny<object>()))
+                .ReturnsAsync(["TakenLogin"]);
 
-            var updateUserCommand = new UpdateUserCommand(user.Id, dto, new Guid(), "Admin");
+            var updateUserCommand = new UpdateUserCommand(new Guid(), dto, new Guid(), "Admin");
             var updateUserHandler = new UpdateUserHandler(_dbService.Object, _str.Object);
             var result = await Assert.ThrowsAsync<ApiErrorException>(
                 async () =>
@@ -46,7 +46,98 @@ namespace AlpimiTest.Entities.EUser.Commands
                 JsonConvert.SerializeObject(
                     new ErrorObject[]
                     {
-                        new ErrorObject("There is already a URL with the name Updated_URL")
+                        new ErrorObject("There is already a Login with the name UpdatedMarek")
+                    }
+                ),
+                JsonConvert.SerializeObject(result.errors)
+            );
+        }
+
+        [Fact]
+        public async Task ThrowsErrorWhenURLAlreadyExists()
+        {
+            var dto = MockData.GetUpdateUserDTODetails();
+            _dbService
+                .Setup(s => s.Get<User>(It.IsAny<string>(), It.IsAny<object>()))
+                .ReturnsAsync(MockData.GetUserDetails());
+            _dbService
+                .Setup(s => s.Get<string>(It.IsAny<string>(), It.IsAny<object>()))
+                .ReturnsAsync("TakenURL");
+
+            var updateUserCommand = new UpdateUserCommand(new Guid(), dto, new Guid(), "Admin");
+            var updateUserHandler = new UpdateUserHandler(_dbService.Object, _str.Object);
+            var result = await Assert.ThrowsAsync<ApiErrorException>(
+                async () =>
+                    await updateUserHandler.Handle(updateUserCommand, new CancellationToken())
+            );
+
+            Assert.Equal(
+                JsonConvert.SerializeObject(
+                    new ErrorObject[]
+                    {
+                        new ErrorObject("There is already a URL with the name UpdatedURL")
+                    }
+                ),
+                JsonConvert.SerializeObject(result.errors)
+            );
+        }
+
+        [Fact]
+        public async Task ThrowsErrorWhenLoginContainsAnIllegalSymbol()
+        {
+            var dto = MockData.GetUpdateUserDTODetails();
+            dto.Login = "る";
+            _dbService
+                .Setup(s => s.Get<User>(It.IsAny<string>(), It.IsAny<object>()))
+                .ReturnsAsync(MockData.GetUserDetails());
+
+            var updateUserCommand = new UpdateUserCommand(new Guid(), dto, new Guid(), "Admin");
+            var updateUserHandler = new UpdateUserHandler(_dbService.Object, _str.Object);
+            var result = await Assert.ThrowsAsync<ApiErrorException>(
+                async () =>
+                    await updateUserHandler.Handle(updateUserCommand, new CancellationToken())
+            );
+            var allowedCharacters = Configuration.GetAllowedCharacterTypesForLogin();
+
+            Assert.Equal(
+                JsonConvert.SerializeObject(
+                    new ErrorObject[]
+                    {
+                        new ErrorObject(
+                            "Login can only contain the following: "
+                                + string.Join(", ", allowedCharacters!)
+                        )
+                    }
+                ),
+                JsonConvert.SerializeObject(result.errors)
+            );
+        }
+
+        [Fact]
+        public async Task ThrowsErrorWhenCustomURLContainsAnIllegalSymbol()
+        {
+            var dto = MockData.GetUpdateUserDTODetails();
+            dto.CustomURL = "る";
+            _dbService
+                .Setup(s => s.Get<User>(It.IsAny<string>(), It.IsAny<object>()))
+                .ReturnsAsync(MockData.GetUserDetails());
+
+            var updateUserCommand = new UpdateUserCommand(new Guid(), dto, new Guid(), "Admin");
+            var updateUserHandler = new UpdateUserHandler(_dbService.Object, _str.Object);
+            var result = await Assert.ThrowsAsync<ApiErrorException>(
+                async () =>
+                    await updateUserHandler.Handle(updateUserCommand, new CancellationToken())
+            );
+            var allowedCharacters = Configuration.GetAllowedCharacterTypesForCustomURL();
+
+            Assert.Equal(
+                JsonConvert.SerializeObject(
+                    new ErrorObject[]
+                    {
+                        new ErrorObject(
+                            "CustomURL can only contain the following: "
+                                + string.Join(", ", allowedCharacters!)
+                        )
                     }
                 ),
                 JsonConvert.SerializeObject(result.errors)

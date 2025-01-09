@@ -3,6 +3,7 @@ using AlpimiAPI.Entities.ESchedule;
 using AlpimiAPI.Entities.ESchedule.Commands;
 using AlpimiAPI.Locales;
 using AlpimiAPI.Responses;
+using AlpimiAPI.Utilities;
 using AlpimiTest.TestSetup;
 using AlpimiTest.TestUtilities;
 using Microsoft.Extensions.Localization;
@@ -207,6 +208,43 @@ namespace AlpimiTest.Entities.ESchedule.Commands
             Assert.Equal(
                 JsonConvert.SerializeObject(
                     new ErrorObject[] { new ErrorObject("SchoolDays parameter is invalid") }
+                ),
+                JsonConvert.SerializeObject(result.errors)
+            );
+        }
+
+        [Fact]
+        public async Task ThrowsErrorWhenNameContainsAnIllegalSymbol()
+        {
+            var dto = MockData.GetCreateScheduleDTODetails();
+            dto.Name = "る";
+            var scheduleSettings = MockData.GetScheduleSettingsDetails();
+
+            var createScheduleCommand = new CreateScheduleCommand(
+                scheduleSettings.Schedule.Id,
+                scheduleSettings.Schedule.UserId,
+                scheduleSettings.Id,
+                dto
+            );
+            var createScheduleHandler = new CreateScheduleHandler(_dbService.Object, _str.Object);
+            var result = await Assert.ThrowsAsync<ApiErrorException>(
+                async () =>
+                    await createScheduleHandler.Handle(
+                        createScheduleCommand,
+                        new CancellationToken()
+                    )
+            );
+            var allowedCharacters = Configuration.GetAllowedCharacterTypesForScheduleName();
+
+            Assert.Equal(
+                JsonConvert.SerializeObject(
+                    new ErrorObject[]
+                    {
+                        new ErrorObject(
+                            "Name can only contain the following: "
+                                + string.Join(", ", allowedCharacters!)
+                        )
+                    }
                 ),
                 JsonConvert.SerializeObject(result.errors)
             );

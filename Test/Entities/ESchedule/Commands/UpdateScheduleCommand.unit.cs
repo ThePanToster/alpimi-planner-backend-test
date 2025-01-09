@@ -3,6 +3,7 @@ using AlpimiAPI.Entities.ESchedule;
 using AlpimiAPI.Entities.ESchedule.Commands;
 using AlpimiAPI.Locales;
 using AlpimiAPI.Responses;
+using AlpimiAPI.Utilities;
 using AlpimiTest.TestSetup;
 using AlpimiTest.TestUtilities;
 using Microsoft.Extensions.Localization;
@@ -50,7 +51,46 @@ namespace AlpimiTest.Entities.ESchedule.Commands
                 JsonConvert.SerializeObject(
                     new ErrorObject[]
                     {
-                        new ErrorObject("There is already a Schedule with the name Updated_plan")
+                        new ErrorObject("There is already a Schedule with the name UpdatedPlan")
+                    }
+                ),
+                JsonConvert.SerializeObject(result.errors)
+            );
+        }
+
+        [Fact]
+        public async Task ThrowsErrorWhenNameContainsAnIllegalSymbol()
+        {
+            var dto = MockData.GetUpdateScheduleDTODetails();
+            dto.Name = "る";
+            _dbService
+                .Setup(s => s.Get<Schedule>(It.IsAny<string>(), It.IsAny<object>()))
+                .ReturnsAsync(MockData.GetScheduleDetails());
+
+            var updateScheduleCommand = new UpdateScheduleCommand(
+                Guid.NewGuid(),
+                dto,
+                new Guid(),
+                "Admin"
+            );
+            var updateScheduleHandler = new UpdateScheduleHandler(_dbService.Object, _str.Object);
+            var result = await Assert.ThrowsAsync<ApiErrorException>(
+                async () =>
+                    await updateScheduleHandler.Handle(
+                        updateScheduleCommand,
+                        new CancellationToken()
+                    )
+            );
+            var allowedCharacters = Configuration.GetAllowedCharacterTypesForScheduleName();
+
+            Assert.Equal(
+                JsonConvert.SerializeObject(
+                    new ErrorObject[]
+                    {
+                        new ErrorObject(
+                            "Name can only contain the following: "
+                                + string.Join(", ", allowedCharacters!)
+                        )
                     }
                 ),
                 JsonConvert.SerializeObject(result.errors)
