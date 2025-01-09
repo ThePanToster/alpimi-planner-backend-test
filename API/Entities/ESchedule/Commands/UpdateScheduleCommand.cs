@@ -3,9 +3,12 @@ using AlpimiAPI.Entities.ESchedule.DTO;
 using AlpimiAPI.Entities.ESchedule.Queries;
 using AlpimiAPI.Locales;
 using AlpimiAPI.Responses;
+using AlpimiAPI.Settings;
+using AlpimiAPI.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AlpimiAPI.Entities.ESchedule.Commands
 {
@@ -50,6 +53,24 @@ namespace AlpimiAPI.Entities.ESchedule.Commands
 
             if (request.dto.Name != null)
             {
+                AllowedCharacterTypes[]? allowedCharacterTypesScheduleName =
+                    Configuration.GetAllowedCharacterTypesForScheduleName();
+
+                if (!CharacterFilter.Allowed(request.dto.Name, allowedCharacterTypesScheduleName))
+                {
+                    throw new ApiErrorException(
+                        [
+                            new ErrorObject(
+                                _str[
+                                    "cantContain",
+                                    "Name",
+                                    string.Join(", ", allowedCharacterTypesScheduleName!)
+                                ]
+                            )
+                        ]
+                    );
+                }
+
                 GetScheduleByNameHandler getScheduleByNameHandler = new GetScheduleByNameHandler(
                     _dbService
                 );

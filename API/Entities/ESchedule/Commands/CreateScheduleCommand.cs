@@ -4,6 +4,8 @@ using AlpimiAPI.Entities.ESchedule.DTO;
 using AlpimiAPI.Entities.ESchedule.Queries;
 using AlpimiAPI.Locales;
 using AlpimiAPI.Responses;
+using AlpimiAPI.Settings;
+using AlpimiAPI.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -45,6 +47,22 @@ namespace AlpimiAPI.Entities.ESchedule.Commands
             )
             {
                 errors.Add(new ErrorObject(_str["badParameter", "SchoolDays"]));
+            }
+
+            AllowedCharacterTypes[]? allowedCharacterTypesScheduleName =
+                Configuration.GetAllowedCharacterTypesForScheduleName();
+
+            if (!CharacterFilter.Allowed(request.dto.Name, allowedCharacterTypesScheduleName))
+            {
+                errors.Add(
+                    new ErrorObject(
+                        _str[
+                            "cantContain",
+                            "Name",
+                            string.Join(", ", allowedCharacterTypesScheduleName!)
+                        ]
+                    )
+                );
             }
 
             if (errors.Count != 0)
