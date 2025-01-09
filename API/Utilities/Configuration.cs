@@ -100,6 +100,31 @@ namespace AlpimiAPI.Utilities
             return new HashAlgorithmName(_hashAlgorithm);
         }
 
+        public static RequiredCharacterTypes[]? GetRequiredCharacterTypesForPassword()
+        {
+            return CharacterSettings.RequiredCharacterTypesForPassword;
+        }
+
+        public static AllowedCharacterTypes[]? GetAllowedCharacterTypesForPassword()
+        {
+            return CharacterSettings.AllowedCharacterTypesForPassword;
+        }
+
+        public static AllowedCharacterTypes[]? GetAllowedCharacterTypesForLogin()
+        {
+            return CharacterSettings.AllowedCharacterTypesForLogin;
+        }
+
+        public static AllowedCharacterTypes[]? GetAllowedCharacterTypesForCustomURL()
+        {
+            return CharacterSettings.AllowedCharacterTypesForCustomURL;
+        }
+
+        public static AllowedCharacterTypes[]? GetAllowedCharacterTypesForScheduleName()
+        {
+            return CharacterSettings.AllowedCharacterTypesForScheduleName;
+        }
+
         public static int GetPermitLimit()
         {
             if (_permitLimit == null)
