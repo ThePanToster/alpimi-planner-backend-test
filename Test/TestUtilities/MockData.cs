@@ -48,7 +48,7 @@ namespace AlpimiTest.TestUtilities
             return new Schedule()
             {
                 Id = new Guid(),
-                Name = "Plan_Marka",
+                Name = "PlanMarka",
                 UserId = new Guid(),
                 User = GetUserDetails()
             };
@@ -224,7 +224,7 @@ namespace AlpimiTest.TestUtilities
 
         public static UpdateUserDTO GetUpdateUserDTODetails()
         {
-            return new UpdateUserDTO() { Login = "Updated_Marek", CustomURL = "Updated_URL" };
+            return new UpdateUserDTO() { Login = "UpdatedMarek", CustomURL = "UpdatedURL" };
         }
 
         public static CreateScheduleDTO GetCreateScheduleDTODetails()
@@ -252,14 +252,14 @@ namespace AlpimiTest.TestUtilities
 
         public static UpdateScheduleDTO GetUpdateScheduleDTODetails()
         {
-            return new UpdateScheduleDTO() { Name = "Updated_plan" };
+            return new UpdateScheduleDTO() { Name = "UpdatedPlan" };
         }
 
         public static CreateScheduleDTO GetCreateSecondScheduleDTODetails()
         {
             return new CreateScheduleDTO()
             {
-                Name = "Second_Name",
+                Name = "SecondName",
                 SchoolHour = 431,
                 SchoolYearStart = new DateOnly(2022, 11, 19),
                 SchoolYearEnd = new DateOnly(2025, 11, 19),
@@ -271,8 +271,8 @@ namespace AlpimiTest.TestUtilities
         {
             return new CreateUserDTO()
             {
-                Login = "Second_User",
-                CustomURL = "Second_URL",
+                Login = "SecondUser",
+                CustomURL = "SecondURL",
                 Password = "sssSSS1!"
             };
         }
@@ -299,7 +299,7 @@ namespace AlpimiTest.TestUtilities
         {
             return new CreateDayOffDTO()
             {
-                Name = "second_name",
+                Name = "second_Name",
                 From = new DateOnly(2021, 8, 8),
                 ScheduleId = scheduleId
             };

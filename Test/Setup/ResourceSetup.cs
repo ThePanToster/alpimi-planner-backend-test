@@ -115,6 +115,13 @@ namespace AlpimiTest.TestSetup
                     "wrongSet",
                     string.Format("{0} must be in the same {1} as {2}", args[0], args[1], args[2])
                 )
+            },
+            {
+                "cantContain",
+                args => new LocalizedString(
+                    "cantContain",
+                    string.Format("{0} can only contain the following: {1}", args[0], args[1])
+                )
             }
         };
 

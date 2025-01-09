@@ -41,8 +41,19 @@
 - [ThrowsErrorWhenURLAlreadyExists()](../Entities/EUser/Commands/CreateUserCommand.unit.cs) - **unit**  
   Check if returns an error when url already exists
 
+- [ThrowsErrorWhenPasswordContainsIllegalAnSymbol](../Entities/EUser/Commands/CreateUserCommand.unit.cs) - **unit**  
+  Check if returns an error when password contains an illegal symbol
+
+- [ThrowsErrorWhenLoginContainsIllegalAnSymbol](../Entities/EUser/Commands/CreateUserCommand.unit.cs) - **unit**  
+  Check if returns an error when login contains an illegal symbol
+	-
+- [ThrowsErrorWhenCustomURLContainsIllegalAnSymbol](../Entities/EUser/Commands/CreateUserCommand.unit.cs) - **unit**  
+  Check if returns an error when url contains an illegal symbol
+
 - [ThrowsMultipleErrorMessages()](../Entities/EUser/Commands/CreateUserCommand.unit.cs) - **unit**  
   Check if returns multiple errors when provided with multiple invalid parameters
+
+
 
 
 ## `DELETE` `api/User/{id}`
@@ -65,8 +76,17 @@
 - [UpdateUserThrowsNotFoundErrorWhenWrongUserAttemptsUpdate()](../Entities/EUser/UserController.test.cs) - **integrity**  
   Check if returns an error when user is inaccessible for the user
 
+- [ThrowsErrorWhenLoginAlreadyExists()](../Entities/EUser/Commands/UpdateUserCommand.unit.cs) - **unit**  
+  Check if returns an error when login is already taken
+
 - [ThrowsErrorWhenURLAlreadyExists()](../Entities/EUser/Commands/UpdateUserCommand.unit.cs) - **unit**  
   Check if returns an error when url is already taken
+
+- [ThrowsErrorWhenLoginContainsIllegalAnSymbol](../Entities/EUser/Commands/UpdateUserCommand.unit.cs) - **unit**  
+  Check if returns an error when login contains an illegal symbol
+	-
+- [ThrowsErrorWhenCustomURLContainsIllegalAnSymbol](../Entities/EUser/Commands/UpdateUserCommand.unit.cs) - **unit**  
+  Check if returns an error when url contains an illegal symbol
 
 
 ## `GET` `api/User/{id}`
